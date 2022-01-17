@@ -1,0 +1,6 @@
+- name: Блог
+  link: /
+- name: Обо мне
+  link: /about/
+- name: Проекты
+  link: /project/
