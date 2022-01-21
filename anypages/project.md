@@ -64,7 +64,7 @@ permalink: /project/
 # Python Notebooks
 Здесь собраны Jupyter Notebooks, которые остались у меня с различных проектов.
 
-- [ClasteringRus.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/ClasteringRus.py) - исходный код программы для статьи на Habr: https://habr.com/ru/post/346206/
-- [Activity.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/Activity.py) - исходный код программы для статьи на Habr: https://habr.com/ru/post/563124/
+- [ClasteringRus.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/ClasteringRus.py) - исходный код программы для статьи на Habr: [https://habr.com/ru/post/346206/](https://habr.com/ru/post/346206/)
+- [Activity.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/Activity.py) - исходный код программы для статьи на Habr: [https://habr.com/ru/post/563124/](https://habr.com/ru/post/563124/)
 - [hack golosovanie.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/hack%20golosovanie.py) - пример просто кода, как можно заспамить сайт запросами и накрутить голосование
 - [KNPZ_messages.ipynb](https://github.com/OlegBezverhii/python-notebooks/blob/master/KNPZ_messages.ipynb) - была задача найти разницу в строках БД, где соседние даты различались.
