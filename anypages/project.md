@@ -1,6 +1,5 @@
 ---
 layout: page
-title: Мои проекты
 permalink: /project/
 ---
 
@@ -55,13 +54,13 @@ permalink: /project/
 [K-Means под pymorph'ом для "Подслушано БГПУ"](http://olegbezverhii.github.io/magistratura/bgpu/podsl.html)
 
 
-# Проект по извлечению установленных обновлений Windows
+## Проект по извлечению установленных обновлений Windows
 
 [Статья на Habrahabr](https://habr.com/ru/post/467445/)
 
 [Репозиторий на Github](https://github.com/OlegBezverhii/List-Update-Cheker)
 
-# Python Notebooks
+## Python Notebooks
 Здесь собраны Jupyter Notebooks, которые остались у меня с различных проектов.
 
 - [ClasteringRus.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/ClasteringRus.py) - исходный код программы для статьи на Habr: [https://habr.com/ru/post/346206/](https://habr.com/ru/post/346206/)
