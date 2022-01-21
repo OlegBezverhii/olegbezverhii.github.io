@@ -1,9 +1,8 @@
 ---
 layout: page
+title: Проекты на Github
 permalink: /project/
 ---
-
-# Проекты на Github
 
 Здесь будет перечень проектов и ссылки на них
 
