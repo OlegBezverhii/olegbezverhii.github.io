@@ -85,3 +85,5 @@ permalink: /about/
 [Ссылка на Стихи.ру](https://stihi.ru/avtor/olegbezverhii)
 
 [Ссылка на Youtube канал](https://www.youtube.com/user/TheOlegye/videos)
+
+[Ссылка на Stackoverflow](https://ru.stackoverflow.com/users/207176/oleg-bezverhii)
