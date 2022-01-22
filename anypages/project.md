@@ -10,7 +10,7 @@ permalink: /project/
 
 Суть работы заключалась в поиске метода, обеспечивающего автоматическое распределение текстов по категориям.
 
-[Статья на Habrahabr](https://habr.com/ru/post/346206/), либо её [английский вариант](https://sudonull.com/post/63544-Clustering-and-visualizing-textual-information)
+[Статья на Habrahabr](https://habr.com/ru/post/346206/), либо её [английский вариант](https://sudonull.com/post/63544-Clustering-and-visualizing-textual-information).
 
 
 [Исходный код на Github](https://github.com/OlegBezverhii/python-notebooks/blob/master/ClasteringRus.py)
