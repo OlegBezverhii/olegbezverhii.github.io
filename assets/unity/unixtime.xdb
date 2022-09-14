@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<FBExchangeFile>
+	<fileHeader company="Schneider Automation" product="Unity Pro XL V11.0 - 151207" dateTime="date_and_time#2022-9-1-20:31:9" content="Function Block source file" DTDVersion="41"></fileHeader>
+	<contentHeader name="MPSA" version="0.0.72" dateTime="date_and_time#2020-9-16-13:42:40"></contentHeader>
+	<FBSource nameOfFBType="MYCONVERTER" version="0.02" dateTime="dt#2022-09-01-20:30:22">
+		<attribute name="TypeCodeCheckSumString" value="7CF8"></attribute>
+		<attribute name="TypeSignatureCheckSumString" value="BA3D"></attribute>
+		<inOutParameters>
+			<variables name="t" typeName="UDINT">
+				<attribute name="PositionPin" value="1"></attribute>
+			</variables>
+		</inOutParameters>
+		<outputParameters>
+			<variables name="DateAndTime" typeName="DATEandTIME">
+				<attribute name="PositionPin" value="2"></attribute>
+			</variables>
+		</outputParameters>
+		<privateLocalVariables>
+			<variables name="z" typeName="UDINT"></variables>
+			<variables name="era" typeName="INT"></variables>
+			<variables name="doe" typeName="UDINT"></variables>
+			<variables name="yoe" typeName="UDINT"></variables>
+			<variables name="y" typeName="UDINT"></variables>
+			<variables name="doy" typeName="UDINT"></variables>
+			<variables name="a" typeName="UDINT"></variables>
+			<variables name="b" typeName="UDINT"></variables>
+			<variables name="c" typeName="UDINT"></variables>
+			<variables name="d" typeName="UDINT"></variables>
+			<variables name="e" typeName="UDINT"></variables>
+			<variables name="f" typeName="UDINT"></variables>
+			<variables name="t0" typeName="UDINT"></variables>
+			<variables name="msk" typeName="UDINT"></variables>
+		</privateLocalVariables>
+		<FBProgram name="MAIN">
+			<STSource>
+msk := 10800;
+(*t0 := t + msk;*)
+
+DateAndTime.second := UDINT_TO_INT(t mod 60);
+t0 := t / 60;
+DateAndTime.minute := UDINT_TO_INT(t0 mod 60);
+t0 := t0 / 60;
+DateAndTime.hour := UDINT_TO_INT(t0 mod 24);
+t0 := t0 / 24;
+
+(*Convert Unix time to date*)
+a := (4 * t0 + 102032) / 146097 + 15;
+b := (t0 + 2442113 + a - (a / 4));
+c := (20 * b - 2442) / 7305;
+d := b - 365 * c - (c / 4);
+e := d * 1000 / 30601;
+f := d - e * 30 - e * 601 / 1000;
+  
+(* 
+January and February are counted as months 13 and 14 of the previous year
+*) 
+IF (e &lt;= 13)
+THEN
+	c := c - 4716;
+	e := e - 1;
+ELSE
+	c := c - 4715;
+	e := e - 13;
+END_IF;
+
+DateAndTime.year := UDINT_TO_INT(c);
+DateAndTime.month := UDINT_TO_INT(e);
+DateAndTime.day := UDINT_TO_INT(f);
+
+</STSource>
+		</FBProgram>
+	</FBSource>
+	<DDTSource DDTName="DATEandTIME" version="0.01" dateTime="dt#2022-09-01-20:24:08">
+		<attribute name="TypeSignatureCheckSumString" value="08CD"></attribute>
+		<structure>
+			<variables name="Year" typeName="INT"></variables>
+			<variables name="Month" typeName="INT"></variables>
+			<variables name="Day" typeName="INT"></variables>
+			<variables name="Hour" typeName="INT"></variables>
+			<variables name="Minute" typeName="INT"></variables>
+			<variables name="Second" typeName="INT"></variables>
+		</structure>
+	</DDTSource>
+</FBExchangeFile>
