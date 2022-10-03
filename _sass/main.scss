@@ -59,6 +59,11 @@ img {
 pre.highlight {
   padding: 1rem;
 }
+  
+.highlight {
+  background-color: #a6e22e;
+}
+
 
 .dark-avatar {
   display: none !important;
@@ -79,10 +84,6 @@ pre.highlight {
   .footer-icon-links:focus {
     text-decoration: none;
     color: #e1e1e1;
-  }
-  
-  .highlight {
-  background-color: #272822;
   }
 
   .archive-title {
