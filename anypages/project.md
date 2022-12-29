@@ -74,3 +74,6 @@ permalink: /project/
 - [Activity.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/Activity.py) - исходный код программы для статьи на Habr: [https://habr.com/ru/post/563124/](https://habr.com/ru/post/563124/)
 - [hack golosovanie.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/hack%20golosovanie.py) - пример просто кода, как можно заспамить сайт запросами и накрутить голосование
 - [KNPZ_messages.ipynb](https://github.com/OlegBezverhii/python-notebooks/blob/master/KNPZ_messages.ipynb) - была задача найти разницу в строках БД, где соседние даты различались.
+
+## Arduino/ESP32/etc
+[Репозиторий на Github](https://github.com/OlegBezverhii/ArduinoProjects)
