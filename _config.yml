@@ -52,6 +52,7 @@ footer-links:
   twitter: OlegBezverhii
   vk: oleg_bezverhii
   habr: Bizonozubr
+  youtube: OlegBezverhii
 
 plugins:
   - jekyll-seo-tag

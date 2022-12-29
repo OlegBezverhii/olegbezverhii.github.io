@@ -59,6 +59,14 @@ permalink: /project/
 
 [Репозиторий на Github](https://github.com/OlegBezverhii/List-Update-Cheker)
 
+## Проект по анализу лиц с помощью веб камеры
+
+[Статья на Habrahabr](https://habr.com/ru/post/563124/)
+
+[Репозиторий на Github](https://github.com/OlegBezverhii/face_rec)
+
+[Видео на Youtube - старая версия](https://www.youtube.com/watch?v=ayGYZgbhLsg)
+
 ## Python Notebooks
 Здесь собраны Jupyter Notebooks, которые остались у меня с различных проектов.
 
