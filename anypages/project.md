@@ -55,20 +55,20 @@ permalink: /project/
 
 ## Проект по извлечению установленных обновлений Windows
 
-[Статья на Habrahabr](https://habr.com/ru/post/467445/)
+[Статья на Habrahabr](https://habr.com/ru/articles/467445/)
 
 [Репозиторий на Github](https://github.com/OlegBezverhii/List-Update-Cheker)
 
 ## Проект по анализу лиц с помощью веб камеры
 
-[Статья на Habrahabr](https://habr.com/ru/post/563124/)
+[Статья на Habrahabr](https://habr.com/ru/articles/563124/)
 
 [Репозиторий на Github](https://github.com/OlegBezverhii/face_rec)
 
 [Видео на Youtube - старая версия](https://www.youtube.com/watch?v=ayGYZgbhLsg)
 
 ## Python Notebooks
-Здесь собраны Jupyter Notebooks, которые остались у меня с различных проектов.
+Здесь собраны [Jupyter Notebooks] (https://github.com/OlegBezverhii/python-notebooks), которые остались у меня с различных проектов. Вот часть из них:
 
 - [ClasteringRus.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/ClasteringRus.py) - исходный код программы для статьи на Habr: [https://habr.com/ru/post/346206/](https://habr.com/ru/post/346206/)
 - [Activity.py](https://github.com/OlegBezverhii/python-notebooks/blob/master/Activity.py) - исходный код программы для статьи на Habr: [https://habr.com/ru/post/563124/](https://habr.com/ru/post/563124/)
@@ -77,3 +77,12 @@ permalink: /project/
 
 ## Arduino/ESP32/etc
 [Репозиторий на Github](https://github.com/OlegBezverhii/ArduinoProjects)
+
+
+## Анализ прошивок от Schneider Electric
+
+[Статья на Habrahabr](https://habr.com/ru/articles/752178/)
+
+[Репозиторий на Github](https://github.com/OlegBezverhii/SchEl-firmware) - здесь можно скачать прошивки, скачанные до ухода компании из РФ.
+
+
