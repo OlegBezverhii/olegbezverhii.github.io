@@ -19,12 +19,17 @@ title: Hackintosh на Ryzen
 Ссылки полезные:
 
 [Список репозиториев на Github](https://github.com/stars/OlegBezverhii/lists/hackintosh) - здесь я собрал всё подряд, но ниже то, что точно понадобилось.
+
 [https://github.com/mikigal/ryzen-hackintosh](https://github.com/mikigal/ryzen-hackintosh) - отличное руководство, чтобы понять что к чему.
+
 Kext для сетевой карты - [LucyRTL8125Ethernet](https://github.com/Mieze/LucyRTL8125Ethernet)
+
 [https://github.com/Xiaoheixu/GIGABYTE-B550M-AORUS-ELITE-OpenCorteBootloader/](https://github.com/Xiaoheixu/GIGABYTE-B550M-AORUS-ELITE-OpenCorteBootloader/releases/tag/B550M) - с доработкой данного конфига у меня установилась система.
+
 Отредактировать наименование CPU можно через данный инструмент - [RestrictEvents](https://github.com/acidanthera/RestrictEvents).
+
 Ну и мой бэкап конфига -  [EFI](https://github.com/OlegBezverhii/olegbezverhii.github.io/tree/master/macos).
 
-![Installed](/assets/images/macos.jpg "Installed")
+![Installed](/assets/images/macos/macos.jpg "Installed")
 
 
