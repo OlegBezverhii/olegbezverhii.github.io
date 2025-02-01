@@ -18,11 +18,19 @@ permalink: /project/
 
 [Статья на Хабре](https://habr.com/ru/articles/752178/) про WinFXNet - программа от производителя Schneider Electric (ESMI) для конфигурирования станций пожарной сигнализации серии Esmi FX.
 
-[Репозиторий на Github](https://github.com/OlegBezverhii/WinFXNet-SchEl) - здесь можно скачать установщик версии WinFXNet 5.3.1.26, а так же патчи из статьи. Генератор лицензий и остальное, что накопаю выложу позже, но и текущего состояния хватит для продуктивной работы с ПО.
+[Репозиторий на Github по WinFXNet](https://github.com/OlegBezverhii/WinFXNet-SchEl) - здесь можно скачать установщик версии WinFXNet 5.3.1.26, а так же патчи из статьи. Генератор лицензий и остальное, что накопаю выложу позже, но и текущего состояния хватит для продуктивной работы с ПО.
+
+[Репозиторий на Github по WinFX3Net](https://github.com/OlegBezverhii/WinFX3Net-SchEl) - здесь можно скачать установщик версии WinFX3Net 7.4.2.0, а чуть позже и патченный файл.
 
 ## Жизненные истории из администрирования
 
 Часть из них опубликованы в этом блоге, но есть статьи на Хабре - вот [пример](https://habr.com/ru/articles/790554/). Те, что проще и не тянут на статью полноценную - те уходят в этот блог.
+
+## Полезные программы для работы с GE Proficy Historian
+
+[https://github.com/OlegBezverhii/AddGEHistorianArhives](https://github.com/OlegBezverhii/AddGEHistorianArhives) - программа для массового добавления архивов из файлов в GE Proficy Historian.
+
+[https://github.com/OlegBezverhii/BackuperGEArchives](https://github.com/OlegBezverhii/BackuperGEArchives) - программа для периодического бэкапа самого старого архива.
 
 
 # Старые проекты
