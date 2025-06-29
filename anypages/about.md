@@ -69,7 +69,7 @@ permalink: /about/
 
 [День карьеры ТОГУ](https://youtu.be/8BFlrrvk6Po)<br>
 
-Участие в первом (региональном) туре III (XV) Международной научно-технической конференции молодежи: [второе место в секции "Автоматизация" в 2019](https://fareast.transneft.ru/press/news/?id=70903), [третье место в секции "Автоматизация" в 2022](https://fareast.transneft.ru/press/news/?id=114131) (на фото нет, потому что был в командировке).
+Участие в первом (региональном) туре III (XV) Международной научно-технической конференции молодежи: [второе место в секции "Автоматизация" в 2019](https://fareast.transneft.ru/media-center/newspress/news/v-ooo-transneft-dalniy-vostok-zavershilsya-regionalnyy-etap-iii-mezhdunarodnoy-nauchno-tekhnicheskoy/), [третье место в секции "Автоматизация" в 2022](https://fareast.transneft.ru/media-center/newspress/news/ooo-transneft-dalniy-vostok-podvelo-itogi-mezhdunarodnoy-nauchno-tekhnicheskoy-konferentsii-molodezh/) (на фото нет, потому что был в командировке).
 
 
 
