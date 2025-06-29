@@ -3,7 +3,7 @@ layout: default
 ---
 
 <div class="archive">
-  {% for post in site.categories.posts %} {% assign currDate = post.date | date: "%Y" %} {%
+  {% for post in site.categories.itblog %} {% assign currDate = post.date | date: "%Y" %} {%
   if currDate != date %}
   <h1 class="archive-year">{{ currDate }}</h1>
   {% assign date = currDate %} {% endif %}
