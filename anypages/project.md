@@ -16,11 +16,14 @@ permalink: /project/
 
 ## «Отучаем» WinFXNet от жадности
 
-[Статья на Хабре](https://habr.com/ru/articles/752178/) про WinFXNet - программа от производителя Schneider Electric (ESMI) для конфигурирования станций пожарной сигнализации серии Esmi FX.
+Серия статей на Хабре ([часть 1](https://habr.com/ru/articles/790564/), [часть 2](https://habr.com/ru/articles/964386/)) про WinFXNet - программа от производителя Schneider Electric (ESMI) для конфигурирования станций пожарной сигнализации серии Esmi FX.
 
-[Репозиторий на Github по WinFXNet](https://github.com/OlegBezverhii/WinFXNet-SchEl) - здесь можно скачать установщик версии WinFXNet 5.3.1.26, а так же патчи из статьи. Генератор лицензий и остальное, что накопаю выложу позже, но и текущего состояния хватит для продуктивной работы с ПО.
+[Репозиторий на Github по WinFXNet](https://github.com/OlegBezverhii/WinFXNet-SchEl) - здесь можно скачать установщик версии WinFXNet 5.3.1.26, а так же патчи из статьи. 
 
 [Репозиторий на Github по WinFX3Net](https://github.com/OlegBezverhii/WinFX3Net-SchEl) - здесь можно скачать установщик версии WinFX3Net 7.4.2.0, а чуть позже и патченный файл.
+
+[Репозиторий на Github по работе с файловыми лицензиями WinFX3Net](https://github.com/OlegBezverhii/WinFXNet-lic-patcher) - здесь можно скачать 3 программы для преобразования содержимого файла WinFXNet.lic.
+
 
 ## Жизненные истории из администрирования
 
