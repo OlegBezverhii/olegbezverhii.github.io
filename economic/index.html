@@ -1,0 +1,25 @@
+---
+layout: default
+---
+
+<div>
+  <h1>Набор статей про экономику</h1>
+  Здесь будут храниться мысли/нужные заметки после просмотров роликов от Антонова/Кримсона и других. Потому что смотреть видос по 3 часа - ну такое. У меня свободного времени мало, а чтобы не забыть нужные мысли решил писать их сюда. Ссылки на посты будут вида: наименование видео - дата выхода видео. Либо: имя статьи (автор) - дата выхода.
+</div>
+
+
+<div class="archive">
+  {% for post in site.categories.antonov %} {% assign currDate = post.date | date: "%Y" %} {%
+  if currDate != date %}
+  <h1 class="archive-year">{{ currDate }}</h1>
+  {% assign date = currDate %} {% endif %}
+  <div class="archive-item">
+    <span class="post-date archive-date fs-4"
+      >{{ post.date | date: "%d %B %Y" }}</span
+    >
+    <a href="{{ post.url | relative_url }}" class="archive-title fs-4"
+      >{{ post.title }}</a
+    >
+  </div>
+  {% endfor %}
+</div>
