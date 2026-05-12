@@ -35,6 +35,11 @@ permalink: /project/
 
 [https://github.com/OlegBezverhii/BackuperGEArchives](https://github.com/OlegBezverhii/BackuperGEArchives) - программа для периодического бэкапа самого старого архива.
 
+NEW!!!
+
+[https://github.com/OlegBezverhii/1yearBackupGEArchives](https://github.com/OlegBezverhii/1yearBackupGEArchives) - консольное приложение и служба для периодического бэкапа архивов старше настраиваемого диапазона в GE Proficy Historian.
+
+
 
 # Старые проекты
 
