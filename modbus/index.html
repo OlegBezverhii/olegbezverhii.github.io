@@ -1,0 +1,758 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Modbus RTU Parser</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body { font-family: 'Segoe UI', system-ui, -apple-system, sans-serif; background: #f5f6fa; color: #2c3e50; min-height: 100vh; display: flex; justify-content: center; padding: 20px; }
+.container { max-width: 960px; width: 100%; }
+h1 { font-size: 24px; font-weight: 600; margin-bottom: 24px; color: #1a1a2e; display: flex; align-items: center; gap: 10px; }
+h1 small { font-size: 14px; font-weight: 400; color: #7f8c8d; }
+.card { background: #fff; border-radius: 12px; box-shadow: 0 2px 12px rgba(0,0,0,0.08); padding: 24px; margin-bottom: 16px; }
+label.field-label { display: block; font-size: 13px; font-weight: 600; color: #555; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+.radio-group { display: flex; gap: 24px; margin-bottom: 4px; }
+.radio-group label { display: flex; align-items: center; gap: 6px; cursor: pointer; font-size: 15px; }
+.radio-group input[type="radio"] { width: 16px; height: 16px; accent-color: #3498db; cursor: pointer; }
+textarea { width: 100%; padding: 12px 14px; font-family: 'Consolas', 'Courier New', monospace; font-size: 15px; border: 2px solid #dce1e8; border-radius: 8px; resize: vertical; min-height: 54px; transition: border-color 0.2s; outline: none; }
+textarea:focus { border-color: #3498db; }
+.hint { font-size: 13px; color: #95a5a6; margin-top: 6px; }
+.btn { display: inline-flex; align-items: center; gap: 6px; padding: 10px 28px; font-size: 15px; font-weight: 500; border: none; border-radius: 8px; cursor: pointer; transition: all 0.2s; }
+.btn-primary { background: #3498db; color: #fff; }
+.btn-primary:hover { background: #2980b9; }
+.btn-primary:active { transform: scale(0.97); }
+.btn-row { margin-top: 12px; display: flex; gap: 10px; align-items: center; }
+.status { margin-top: 12px; padding: 10px 14px; border-radius: 8px; font-size: 14px; display: none; }
+.status.error { display: block; background: #ffeaea; color: #c0392b; border: 1px solid #f5c6cb; }
+.status.ok { display: block; background: #e8f8f5; color: #1a7a5c; border: 1px solid #b2dfdb; }
+table { width: 100%; border-collapse: separate; border-spacing: 0; margin-top: 16px; }
+th { background: #f8f9fa; font-size: 12px; font-weight: 600; color: #555; text-transform: uppercase; letter-spacing: 0.5px; padding: 10px 14px; text-align: left; border-bottom: 2px solid #e9ecef; }
+th:first-child { border-radius: 8px 0 0 0; }
+th:last-child { border-radius: 0 8px 0 0; }
+td { padding: 10px 14px; border-bottom: 1px solid #f0f0f0; font-size: 14px; vertical-align: top; }
+td.value-cell { word-break: break-all; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; max-width: 400px; overflow-wrap: break-word; }
+td.value-regs { font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; word-break: break-all; line-height: 1.6; }
+tr:last-child td:first-child { border-radius: 0 0 0 8px; }
+tr:last-child td:last-child { border-radius: 0 0 8px 0; }
+td.bytes { font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; word-break: break-all; max-width: 180px; }
+td .desc-label { font-size: 12px; color: #7f8c8d; }
+td .val { font-family: 'Consolas', 'Courier New', monospace; }
+td .val-hl { color: #2980b9; }
+tr.crc-row td { background: #fafbfc; }
+tr.crc-ok td { background: #e8f8f5; }
+tr.crc-err td { background: #fff5f5; }
+tr.exception td { background: #fff3e0; }
+.empty-state { text-align: center; padding: 40px 20px; color: #95a5a6; font-size: 15px; }
+.empty-state .icon { font-size: 40px; margin-bottom: 8px; display: block; }
+@media (max-width: 600px) { .container { padding: 0; } body { padding: 12px; } .card { padding: 16px; } th, td { padding: 8px 10px; font-size: 13px; } }
+.crc-summary { display: inline-flex; align-items: center; gap: 6px; font-weight: 500; }
+.crc-summary.valid { color: #1a7a5c; }
+.crc-summary.invalid { color: #c0392b; }
+table .sub-row td { padding: 4px 14px 4px 42px; font-size: 13px; background: #fafbfc; }
+table .sub-row td.bytes { padding-left: 42px; }
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>Modbus RTU Parser <small>локальный парсер</small></h1>
+
+  <div class="card">
+    <label class="field-label">Data Direction</label>
+    <div class="radio-group">
+      <label><input type="radio" name="direction" value="request" checked> Request</label>
+      <label><input type="radio" name="direction" value="response"> Response</label>
+    </div>
+  </div>
+
+  <div class="card">
+    <label class="field-label" for="dataInput">Data Package (Application Data Unit):</label>
+    <textarea id="dataInput" rows="2" placeholder="10 06 02 02 00 03 6A F2"></textarea>
+    <div class="hint">Введите hex-байты через пробел (или без разделителей). Пример: 10 06 02 02 00 03 6A F2</div>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="parseBtn">Parse</button>
+      <span style="font-size:13px;color:#95a5a6;" id="byteCount"></span>
+      <span style="font-size:12px;color:#bdc3c7;">Enter — парсить</span>
+    </div>
+    <div id="statusMsg" class="status"></div>
+  </div>
+
+  <div class="card" id="resultCard" style="display:none;">
+    <div id="resultContent"></div>
+  </div>
+</div>
+
+<script>
+// ===================== CRC-16/Modbus =====================
+function crc16Modbus(bytes) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < bytes.length; i++) {
+    crc ^= bytes[i];
+    for (let j = 0; j < 8; j++) {
+      if (crc & 0x0001) crc = (crc >> 1) ^ 0xA001;
+      else crc = crc >> 1;
+    }
+  }
+  return crc;
+}
+
+// ===================== Function Code Definitions =====================
+const FC = {
+  0x01: { name: 'Read Coils', short: 'Read Coils' },
+  0x02: { name: 'Read Discrete Inputs', short: 'Read Discrete Inputs' },
+  0x03: { name: 'Read Holding Registers', short: 'Read Holding Registers' },
+  0x04: { name: 'Read Input Registers', short: 'Read Input Registers' },
+  0x05: { name: 'Write Single Coil', short: 'Write Single Coil' },
+  0x06: { name: 'Write Single Register', short: 'Write Single Register' },
+  0x07: { name: 'Read Exception Status', short: 'Read Exception Status' },
+  0x08: { name: 'Diagnostics', short: 'Diagnostics' },
+  0x0B: { name: 'Get Comm Event Counter', short: 'Get Comm Event Counter' },
+  0x0C: { name: 'Get Comm Event Log', short: 'Get Comm Event Log' },
+  0x0F: { name: 'Write Multiple Coils', short: 'Write Multiple Coils' },
+  0x10: { name: 'Write Multiple Registers', short: 'Write Multiple Registers' },
+  0x11: { name: 'Report Server ID', short: 'Report Server ID' },
+  0x14: { name: 'Read File Record', short: 'Read File Record' },
+  0x15: { name: 'Write File Record', short: 'Write File Record' },
+  0x16: { name: 'Mask Write Register', short: 'Mask Write Register' },
+  0x17: { name: 'Read/Write Multiple Registers', short: 'Read/Write Mult Regs' },
+  0x18: { name: 'Read FIFO Queue', short: 'Read FIFO Queue' },
+  0x2B: { name: 'Encapsulated Interface Transport', short: 'Encapsulated Interface' },
+};
+
+const EXCEPTION_CODES = {
+  0x01: 'Illegal Function',
+  0x02: 'Illegal Data Address',
+  0x03: 'Illegal Data Value',
+  0x04: 'Slave Device Failure',
+  0x05: 'Acknowledge',
+  0x06: 'Slave Device Busy',
+  0x07: 'Negative Acknowledge',
+  0x08: 'Memory Parity Error',
+  0x0A: 'Gateway Path Unavailable',
+  0x0B: 'Gateway Target Device Failed to Respond',
+};
+
+// ===================== Parsers =====================
+function bytesToHex(bytes, start, len) {
+  return Array.from(bytes.slice(start, start + len)).map(b => b.toString(16).padStart(2, '0').toUpperCase()).join(' ');
+}
+
+function bytesToHexLines(bytes, start, len) {
+  const arr = bytes.slice(start, start + len);
+  const pairs = [];
+  for (let i = 0; i < arr.length; i += 2) {
+    let pair = arr[i].toString(16).padStart(2, '0').toUpperCase();
+    if (i + 1 < arr.length) pair += ' ' + arr[i + 1].toString(16).padStart(2, '0').toUpperCase();
+    pairs.push(pair);
+  }
+  return pairs.join('<br>');
+}
+
+function toHexVal(v, pad) {
+  return '0x' + v.toString(16).toUpperCase().padStart(pad || 0, '0');
+}
+
+function makeRow(bytesHex, desc, value, cls, valCls) {
+  return { bytes: bytesHex, desc: desc, value: value, cls: cls || '', valCls: valCls || '' };
+}
+
+function parseReadRequest(bytes, fc) {
+  const rows = [];
+  const startAddr = (bytes[2] << 8) | bytes[3];
+  const quantity = (bytes[4] << 8) | bytes[5];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Starting address', `Physical: ${toHexVal(startAddr, 4)} (${startAddr})<br>Logical: ${toHexVal(startAddr + 1, 4)} (${startAddr + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Quantity', `${quantity} (${toHexVal(quantity, 4)})`));
+  return rows;
+}
+
+function parseReadResponse(bytes, fc) {
+  const rows = [];
+  const byteCount = bytes.length > 2 ? bytes[2] : 0;
+  rows.push(makeRow(bytesToHex(bytes, 2, 1), 'Byte count', `${byteCount} (${toHexVal(byteCount, 2)})`));
+  const isRegs = fc === 0x03 || fc === 0x04;
+  const dataDesc = fc === 0x01 ? 'Coil statuses' : fc === 0x02 ? 'Input statuses' : isRegs ? 'Register values' : 'Input register values';
+
+  if (isRegs && byteCount >= 2) {
+    const regCount = byteCount / 2;
+    const lines = [];
+    for (let i = 0; i < regCount; i++) {
+      const idx = 3 + i * 2;
+      const val = bytes.length > idx + 1 ? (bytes[idx] << 8) | bytes[idx + 1] : 0;
+      lines.push(`#${i + 1}: ${toHexVal(val, 4)} (${val})`);
+    }
+    rows.push(makeRow(bytesToHexLines(bytes, 3, byteCount), `${dataDesc} (${regCount} рег.)`, lines.join('<br>'), '', 'value-regs'));
+  } else {
+    rows.push(makeRow(bytesToHex(bytes, 3, byteCount), dataDesc, bytesToHex(bytes, 3, byteCount), '', 'value-cell'));
+  }
+  return rows;
+}
+
+function parseWriteSingleCoilRequest(bytes) {
+  const rows = [];
+  const outAddr = (bytes[2] << 8) | bytes[3];
+  const outVal = (bytes[4] << 8) | bytes[5];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Output address', `Physical: ${toHexVal(outAddr, 4)} (${outAddr})<br>Logical: ${toHexVal(outAddr + 1, 4)} (${outAddr + 1})`));
+  const coilState = outVal === 0xFF00 ? 'ON' : outVal === 0x0000 ? 'OFF' : 'Invalid';
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Output value', `${toHexVal(outVal, 4)} (${outVal}) — ${coilState}`));
+  return rows;
+}
+
+function parseWriteSingleCoilResponse(bytes) {
+  return parseWriteSingleCoilRequest(bytes);
+}
+
+function parseWriteSingleRegRequest(bytes) {
+  const rows = [];
+  const regAddr = (bytes[2] << 8) | bytes[3];
+  const regVal = (bytes[4] << 8) | bytes[5];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Register address', `Physical: ${toHexVal(regAddr, 4)} (${regAddr})<br>Logical: ${toHexVal(regAddr + 1, 4)} (${regAddr + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Register value', `${toHexVal(regVal, 4)} (${regVal})`));
+  return rows;
+}
+
+function parseWriteSingleRegResponse(bytes) {
+  return parseWriteSingleRegRequest(bytes);
+}
+
+function parseWriteMultipleCoilsRequest(bytes) {
+  const rows = [];
+  const startAddr = (bytes[2] << 8) | bytes[3];
+  const quantity = (bytes[4] << 8) | bytes[5];
+  const byteCount = bytes[6];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Starting address', `Physical: ${toHexVal(startAddr, 4)} (${startAddr})<br>Logical: ${toHexVal(startAddr + 1, 4)} (${startAddr + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Quantity', `${quantity} (${toHexVal(quantity, 4)})`));
+  rows.push(makeRow(bytesToHex(bytes, 6, 1), 'Byte count', `${byteCount} (${toHexVal(byteCount, 2)})`));
+  rows.push(makeRow(bytesToHex(bytes, 7, byteCount), 'Output values', bytesToHex(bytes, 7, byteCount)));
+  return rows;
+}
+
+function parseWriteMultipleCoilsResponse(bytes) {
+  const rows = [];
+  const startAddr = (bytes[2] << 8) | bytes[3];
+  const quantity = (bytes[4] << 8) | bytes[5];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Starting address', `Physical: ${toHexVal(startAddr, 4)} (${startAddr})<br>Logical: ${toHexVal(startAddr + 1, 4)} (${startAddr + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Quantity', `${quantity} (${toHexVal(quantity, 4)})`));
+  return rows;
+}
+
+function parseWriteMultipleRegsRequest(bytes) {
+  const rows = [];
+  const startAddr = bytes.length > 3 ? (bytes[2] << 8) | bytes[3] : 0;
+  const quantity = bytes.length > 5 ? (bytes[4] << 8) | bytes[5] : 0;
+  const byteCount = bytes.length > 6 ? bytes[6] : 0;
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Starting address', `Physical: ${toHexVal(startAddr, 4)} (${startAddr})<br>Logical: ${toHexVal(startAddr + 1, 4)} (${startAddr + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Quantity', `${quantity} (${toHexVal(quantity, 4)})`));
+  rows.push(makeRow(bytesToHex(bytes, 6, 1), 'Byte count', `${byteCount} (${toHexVal(byteCount, 2)})`));
+
+  if (quantity > 0 && byteCount >= 2 && bytes.length >= 7 + byteCount) {
+    const lines = [];
+    for (let i = 0; i < quantity; i++) {
+      const idx = 7 + i * 2;
+      const val = bytes.length > idx + 1 ? (bytes[idx] << 8) | bytes[idx + 1] : 0;
+      lines.push(`#${startAddr + 1 + i}: ${toHexVal(val, 4)} (${val})`);
+    }
+    rows.push(makeRow(bytesToHexLines(bytes, 7, byteCount), `Register values (${quantity} рег.)`, lines.join('<br>'), '', 'value-regs'));
+  } else {
+    rows.push(makeRow(bytesToHex(bytes, 7, byteCount), 'Register values', bytesToHex(bytes, 7, byteCount), '', 'value-cell'));
+  }
+  return rows;
+}
+
+function parseWriteMultipleRegsResponse(bytes) {
+  const rows = [];
+  const startAddr = (bytes[2] << 8) | bytes[3];
+  const quantity = (bytes[4] << 8) | bytes[5];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Starting address', `Physical: ${toHexVal(startAddr, 4)} (${startAddr})<br>Logical: ${toHexVal(startAddr + 1, 4)} (${startAddr + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Quantity', `${quantity} (${toHexVal(quantity, 4)})`));
+  return rows;
+}
+
+function parseMaskWriteRegRequest(bytes) {
+  const rows = [];
+  const refAddr = (bytes[2] << 8) | bytes[3];
+  const andMask = (bytes[4] << 8) | bytes[5];
+  const orMask = (bytes[6] << 8) | bytes[7];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Reference address', `Physical: ${toHexVal(refAddr, 4)} (${refAddr})<br>Logical: ${toHexVal(refAddr + 1, 4)} (${refAddr + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'AND mask', `${toHexVal(andMask, 4)} (${andMask})`));
+  rows.push(makeRow(bytesToHex(bytes, 6, 2), 'OR mask', `${toHexVal(orMask, 4)} (${orMask})`));
+  return rows;
+}
+
+function parseMaskWriteRegResponse(bytes) {
+  return parseMaskWriteRegRequest(bytes);
+}
+
+function parseReadWriteMultRegsRequest(bytes) {
+  const rows = [];
+  const readStart = bytes.length > 3 ? (bytes[2] << 8) | bytes[3] : 0;
+  const readQty = bytes.length > 5 ? (bytes[4] << 8) | bytes[5] : 0;
+  const writeStart = bytes.length > 7 ? (bytes[6] << 8) | bytes[7] : 0;
+  const writeQty = bytes.length > 9 ? (bytes[8] << 8) | bytes[9] : 0;
+  const writeByteCount = bytes.length > 10 ? bytes[10] : 0;
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Read starting address', `Physical: ${toHexVal(readStart, 4)} (${readStart})<br>Logical: ${toHexVal(readStart + 1, 4)} (${readStart + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Read quantity', `${readQty} (${toHexVal(readQty, 4)})`));
+  rows.push(makeRow(bytesToHex(bytes, 6, 2), 'Write starting address', `Physical: ${toHexVal(writeStart, 4)} (${writeStart})<br>Logical: ${toHexVal(writeStart + 1, 4)} (${writeStart + 1})`));
+  rows.push(makeRow(bytesToHex(bytes, 8, 2), 'Write quantity', `${writeQty} (${toHexVal(writeQty, 4)})`));
+  rows.push(makeRow(bytesToHex(bytes, 10, 1), 'Write byte count', `${writeByteCount} (${toHexVal(writeByteCount, 2)})`));
+
+  if (writeQty > 0 && writeByteCount >= 2 && bytes.length >= 11 + writeByteCount) {
+    const lines = [];
+    for (let i = 0; i < writeQty; i++) {
+      const idx = 11 + i * 2;
+      const val = bytes.length > idx + 1 ? (bytes[idx] << 8) | bytes[idx + 1] : 0;
+      lines.push(`#${writeStart + 1 + i}: ${toHexVal(val, 4)} (${val})`);
+    }
+    rows.push(makeRow(bytesToHexLines(bytes, 11, writeByteCount), `Write register values (${writeQty} рег.)`, lines.join('<br>'), '', 'value-regs'));
+  } else {
+    rows.push(makeRow(bytesToHex(bytes, 11, writeByteCount), 'Write register values', bytesToHex(bytes, 11, writeByteCount), '', 'value-cell'));
+  }
+  return rows;
+}
+
+function parseReadWriteMultRegsResponse(bytes) {
+  const rows = [];
+  const byteCount = bytes.length > 2 ? bytes[2] : 0;
+  rows.push(makeRow(bytesToHex(bytes, 2, 1), 'Byte count', `${byteCount} (${toHexVal(byteCount, 2)})`));
+
+  if (byteCount >= 2 && bytes.length >= 3 + byteCount) {
+    const regCount = byteCount / 2;
+    const lines = [];
+    for (let i = 0; i < regCount; i++) {
+      const idx = 3 + i * 2;
+      const val = bytes.length > idx + 1 ? (bytes[idx] << 8) | bytes[idx + 1] : 0;
+      lines.push(`#${i + 1}: ${toHexVal(val, 4)} (${val})`);
+    }
+    rows.push(makeRow(bytesToHexLines(bytes, 3, byteCount), `Read register values (${regCount} рег.)`, lines.join('<br>'), '', 'value-regs'));
+  } else {
+    rows.push(makeRow(bytesToHex(bytes, 3, byteCount), 'Read register values', bytesToHex(bytes, 3, byteCount), '', 'value-cell'));
+  }
+  return rows;
+}
+
+function parseReadFIFORequest(bytes) {
+  const rows = [];
+  const fifoAddr = (bytes[2] << 8) | bytes[3];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'FIFO address', `Physical: ${toHexVal(fifoAddr, 4)} (${fifoAddr})<br>Logical: ${toHexVal(fifoAddr + 1, 4)} (${fifoAddr + 1})`));
+  return rows;
+}
+
+function parseReadFIFOResponse(bytes) {
+  const rows = [];
+  const byteCount = (bytes[2] << 8) | bytes[3];
+  const fifoCount = (bytes[4] << 8) | bytes[5];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Byte count', `${byteCount} (${toHexVal(byteCount, 4)})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'FIFO count', `${fifoCount} (${toHexVal(fifoCount, 4)})`));
+  if (fifoCount > 0) {
+    rows.push(makeRow(bytesToHex(bytes, 6, fifoCount * 2), 'FIFO values', bytesToHex(bytes, 6, fifoCount * 2)));
+  }
+  return rows;
+}
+
+function parseDiagRequest(bytes) {
+  const rows = [];
+  const subFunc = (bytes[2] << 8) | bytes[3];
+  const diagNames = {
+    0x0000: 'Return Query Data',
+    0x0001: 'Restart Communications Option',
+    0x0002: 'Return Diagnostic Register',
+    0x0003: 'Change ASCII Input Delimiter',
+    0x0004: 'Force Listen Only Mode',
+    0x000A: 'Clear Counters and Diagnostic Register',
+    0x000B: 'Return Bus Message Count',
+    0x000C: 'Return Bus Communication Error Count',
+    0x000D: 'Return Bus Exception Error Count',
+    0x000E: 'Return Slave Message Count',
+    0x000F: 'Return Slave No Response Count',
+    0x0010: 'Return Slave Busy Count',
+    0x0011: 'Return Bus Character Overrun Count',
+    0x0012: 'Return IOP Overrun Count',
+  };
+  const diagName = diagNames[subFunc] || 'Unknown';
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Sub-function', `${toHexVal(subFunc, 4)} (${subFunc}) — ${diagName}`));
+  const dataLen = bytes.length - 4 - 2; // remaining after sub-func (minus CRC)
+  if (dataLen > 0) {
+    rows.push(makeRow(bytesToHex(bytes, 4, dataLen), 'Data', bytesToHex(bytes, 4, dataLen)));
+  }
+  return rows;
+}
+
+function parseDiagResponse(bytes) {
+  return parseDiagRequest(bytes);
+}
+
+function parseCommEventCounterResponse(bytes) {
+  const rows = [];
+  const status = (bytes[2] << 8) | bytes[3];
+  const eventCount = (bytes[4] << 8) | bytes[5];
+  rows.push(makeRow(bytesToHex(bytes, 2, 2), 'Status', `${toHexVal(status, 4)} (${status})`));
+  rows.push(makeRow(bytesToHex(bytes, 4, 2), 'Event count', `${eventCount} (${toHexVal(eventCount, 4)})`));
+  return rows;
+}
+
+function parseCommEventLogResponse(bytes) {
+  const rows = [];
+  const byteCount = bytes[2];
+  const status = (bytes[3] << 8) | bytes[4];
+  const eventCount = (bytes[5] << 8) | bytes[6];
+  const msgCount = (bytes[7] << 8) | bytes[8];
+  rows.push(makeRow(bytesToHex(bytes, 2, 1), 'Byte count', `${byteCount} (${toHexVal(byteCount, 2)})`));
+  rows.push(makeRow(bytesToHex(bytes, 3, 2), 'Status', `${toHexVal(status, 4)} (${status})`));
+  rows.push(makeRow(bytesToHex(bytes, 5, 2), 'Event count', `${eventCount} (${toHexVal(eventCount, 4)})`));
+  rows.push(makeRow(bytesToHex(bytes, 7, 2), 'Message count', `${msgCount} (${toHexVal(msgCount, 4)})`));
+  const eventsLen = byteCount - 6;
+  if (eventsLen > 0) {
+    rows.push(makeRow(bytesToHex(bytes, 9, eventsLen), 'Events', bytesToHex(bytes, 9, eventsLen)));
+  }
+  return rows;
+}
+
+function parseReadExceptionStatusResponse(bytes) {
+  const rows = [];
+  rows.push(makeRow(bytesToHex(bytes, 2, 1), 'Output data', `${toHexVal(bytes[2], 2)} (${bytes[2]})`));
+  return rows;
+}
+
+function parseReportServerIDResponse(bytes) {
+  const rows = [];
+  const byteCount = bytes[2];
+  rows.push(makeRow(bytesToHex(bytes, 2, 1), 'Byte count', `${byteCount} (${toHexVal(byteCount, 2)})`));
+  rows.push(makeRow(bytesToHex(bytes, 3, byteCount), 'Server ID data', bytesToHex(bytes, 3, byteCount)));
+  return rows;
+}
+
+// ===================== Expected Frame Sizes (data bytes only: total - addr(1) - fc(1) - crc(2)) =====================
+// Number = exact expected data bytes; -1 = variable/unchecked; {min, byteIdx, desc} = validated min + byte-count check
+const FC_SIZES = {
+  0x01: { req: 4, resp: { min: 1, byteIdx: 2, desc: 'Byte count не соответствует оставшимся данным' } },
+  0x02: { req: 4, resp: { min: 1, byteIdx: 2, desc: 'Byte count не соответствует оставшимся данным' } },
+  0x03: { req: 4, resp: { min: 1, byteIdx: 2, desc: 'Byte count не соответствует оставшимся данным' } },
+  0x04: { req: 4, resp: { min: 1, byteIdx: 2, desc: 'Byte count не соответствует оставшимся данным' } },
+  0x05: { req: 4, resp: 4 },
+  0x06: { req: 4, resp: 4 },
+  0x07: { req: 0, resp: 1 },
+  0x08: { req: 2, resp: 2 },
+  0x0B: { req: 0, resp: 4 },
+  0x0C: { req: 0, resp: { min: 7, byteIdx: 2, desc: 'Byte count не соответствует оставшимся данным' } },
+  0x0F: { req: { min: 5, byteIdx: 6, desc: 'Byte count не соответствует оставшимся данным' }, resp: 4 },
+  0x10: { req: { min: 5, byteIdx: 6, desc: 'Byte count не соответствует оставшимся данным' }, resp: 4 },
+  0x11: { req: 0, resp: { min: 1, byteIdx: 2, desc: 'Byte count не соответствует оставшимся данным' } },
+  0x16: { req: 6, resp: 6 },
+  0x17: { req: { min: 9, byteIdx: 10, desc: 'Write byte count не соответствует оставшимся данным' }, resp: { min: 1, byteIdx: 2, desc: 'Byte count не соответствует оставшимся данным' } },
+  0x18: { req: 2, resp: { min: 4, byteIdx: 2, desc: 'Byte count (2 байта) не соответствует оставшимся данным' } },
+};
+
+function getExpectedSize(fc, isReq) {
+  const s = FC_SIZES[fc];
+  if (!s) return null;
+  return isReq ? s.req : s.resp;
+}
+
+// ===================== Main Parse Logic =====================
+const REQ_PARSERS = {
+  0x01: parseReadRequest, 0x02: parseReadRequest, 0x03: parseReadRequest, 0x04: parseReadRequest,
+  0x05: parseWriteSingleCoilRequest,
+  0x06: parseWriteSingleRegRequest,
+  0x07: () => [], // Read Exception Status — request has no data beyond FC
+  0x08: parseDiagRequest,
+  0x0B: () => [],
+  0x0C: () => [],
+  0x0F: parseWriteMultipleCoilsRequest,
+  0x10: parseWriteMultipleRegsRequest,
+  0x11: () => [],
+  0x14: () => { return [{ bytes: '', desc: '', value: 'Read File Record — not implemented in detail' }]; },
+  0x15: () => { return [{ bytes: '', desc: '', value: 'Write File Record — not implemented in detail' }]; },
+  0x16: parseMaskWriteRegRequest,
+  0x17: parseReadWriteMultRegsRequest,
+  0x18: parseReadFIFORequest,
+  0x2B: () => { return [{ bytes: '', desc: '', value: 'Encapsulated Interface Transport' }]; },
+};
+
+const RESP_PARSERS = {
+  0x01: parseReadResponse, 0x02: parseReadResponse, 0x03: parseReadResponse, 0x04: parseReadResponse,
+  0x05: parseWriteSingleCoilResponse,
+  0x06: parseWriteSingleRegResponse,
+  0x07: parseReadExceptionStatusResponse,
+  0x08: parseDiagResponse,
+  0x0B: parseCommEventCounterResponse,
+  0x0C: parseCommEventLogResponse,
+  0x0F: parseWriteMultipleCoilsResponse,
+  0x10: parseWriteMultipleRegsResponse,
+  0x11: parseReportServerIDResponse,
+  0x14: () => { return [{ bytes: '', desc: '', value: 'Read File Record response' }]; },
+  0x15: () => { return [{ bytes: '', desc: '', value: 'Write File Record response' }]; },
+  0x16: parseMaskWriteRegResponse,
+  0x17: parseReadWriteMultRegsResponse,
+  0x18: parseReadFIFOResponse,
+  0x2B: () => { return [{ bytes: '', desc: '', value: 'Encapsulated Interface Transport response' }]; },
+};
+
+function hexToBytes(hexStr) {
+  // Remove all non-hex characters, keep only 0-9, a-f, A-F
+  let cleaned = hexStr.replace(/[^0-9a-fA-F]/g, '');
+  if (cleaned.length === 0) return null;
+  // If odd length, pad with leading zero
+  if (cleaned.length % 2 !== 0) cleaned = '0' + cleaned;
+  const bytes = [];
+  for (let i = 0; i < cleaned.length; i += 2) {
+    const b = parseInt(cleaned.substring(i, i + 2), 16);
+    if (isNaN(b)) return null;
+    bytes.push(b);
+  }
+  return bytes;
+}
+
+function parsePackage(hexStr, direction) {
+  hexStr = hexStr.trim();
+  if (!hexStr) return { error: 'Введите данные для парсинга.' };
+
+  const bytes = hexToBytes(hexStr);
+  if (!bytes || bytes.length === 0) {
+    return { error: 'Некорректный формат. Введите hex-байты через пробел.' };
+  }
+
+  if (bytes.length < 4) {
+    return { error: 'Слишком мало данных. Минимум 4 байта (адрес + функция + CRC).' };
+  }
+
+  const isReq = direction === 'request';
+  const slaveAddr = bytes[0];
+  const fcByte = bytes[1];
+  const isException = !isReq && (fcByte & 0x80) !== 0;
+  const actualFC = isException ? fcByte & 0x7F : fcByte;
+
+  let rows = [];
+  const result = { slaveAddr, fcByte, actualFC, isException, rows, bytes, warnings: [] };
+
+  // Slave address
+  rows.push(makeRow(bytesToHex(bytes, 0, 1), 'Slave address', `${toHexVal(slaveAddr, 2)} (${slaveAddr})`));
+
+  // Function code
+  if (isException) {
+    const excCode = bytes.length > 2 ? bytes[2] : 0;
+    const excName = EXCEPTION_CODES[excCode] || 'Unknown';
+    rows.push(makeRow(bytesToHex(bytes, 1, 1), 'Function code (exception)', `${toHexVal(fcByte, 2)} (${fcByte}) — ${FC[actualFC] ? FC[actualFC].name : 'Unknown'} exception`));
+    rows.push(makeRow(bytesToHex(bytes, 2, 1), 'Exception code', `${toHexVal(excCode, 2)} (${excCode}) — ${excName}`));
+    const crcIdx = 3;
+    if (bytes.length >= crcIdx + 2) {
+      const receivedCRC = (bytes[crcIdx + 1] << 8) | bytes[crcIdx];
+      const crcData = bytes.slice(0, crcIdx);
+      const calcCRC = crc16Modbus(crcData);
+      const crcValid = receivedCRC === calcCRC;
+      rows.push(makeRow(bytesToHex(bytes, crcIdx, 2), 'CRC (CRC-16/Modbus)', `${toHexVal(receivedCRC, 4)} (${receivedCRC}) ${crcValid ? '✓' : '✗'}`, crcValid ? 'crc-ok' : 'crc-err'));
+      result.crcValid = crcValid;
+      result.calcCRC = calcCRC;
+      result.receivedCRC = receivedCRC;
+    } else {
+      result.warnings.push('Недостаточно байтов для CRC.');
+    }
+    return result;
+  }
+
+  const fcInfo = FC[actualFC];
+  const fcName = fcInfo ? fcInfo.name : 'Unknown';
+  rows.push(makeRow(bytesToHex(bytes, 1, 1), 'Function code', `${toHexVal(actualFC, 2)} (${actualFC}) — ${fcName}`));
+
+  // --- Validate frame size ---
+  const expSize = getExpectedSize(actualFC, isReq);
+  const dataLen = bytes.length - 4; // bytes excluding addr(1) + fc(1) + crc(2)
+
+  if (expSize !== undefined && expSize !== null) {
+    if (typeof expSize === 'number' && expSize >= 0 && dataLen !== expSize) {
+      result.warnings.push(
+        `Неверная длина данных для этого ${isReq ? 'запроса' : 'ответа'}: ожидалось ${expSize} байт(а) данных, получено ${dataLen} байт(а).` +
+        (isReq ? ' Возможно, выбран неверный Data Direction?' : '')
+      );
+    } else if (typeof expSize === 'object') {
+      if (dataLen < expSize.min) {
+        result.warnings.push(
+          `Слишком мало данных для этого ${isReq ? 'запроса' : 'ответа'}: ожидалось минимум ${expSize.min} байт(а), получено ${dataLen} байт(а).` +
+          (isReq ? ' Возможно, выбран неверный Data Direction?' : '')
+        );
+      } else if (expSize.byteIdx !== undefined) {
+        const byteCountIdx = expSize.byteIdx; // index into the full bytes array
+        if (byteCountIdx < bytes.length - 2) {
+          const declaredLen = bytes[byteCountIdx];
+          const remaining = bytes.length - byteCountIdx - 1 - 2; // after byteCount byte, before CRC
+          if (declaredLen !== remaining) {
+            result.warnings.push(
+              `${expSize.desc || 'Размер пакета не совпадает'}: заявлено ${declaredLen} байт(а) данных, фактически ${remaining} байт(а).`
+            );
+          }
+        }
+      }
+    }
+  } else if (!fcInfo) {
+    result.warnings.push(`Неизвестный function code 0x${actualFC.toString(16).toUpperCase().padStart(2, '0')}. Сырые данные показаны как есть.`);
+  }
+
+  // Parse data based on function code and direction
+  const parsers = isReq ? REQ_PARSERS : RESP_PARSERS;
+  const parser = parsers[actualFC];
+
+  let dataRows = [];
+  const dataEndIdx = bytes.length - 2; // before CRC
+
+  if (parser) {
+    try {
+      const rc = parser(bytes);
+      if (Array.isArray(rc)) {
+        dataRows = rc;
+      }
+    } catch (e) {
+      result.warnings.push('Ошибка при разборе данных: ' + e.message);
+    }
+  } else {
+    if (dataEndIdx > 2) {
+      dataRows.push(makeRow(bytesToHex(bytes, 2, dataEndIdx - 2), 'Data', bytesToHex(bytes, 2, dataEndIdx - 2)));
+    }
+  }
+
+  rows.push(...dataRows);
+
+  // CRC
+  if (bytes.length >= 2) {
+    const receivedCRC = (bytes[bytes.length - 1] << 8) | bytes[bytes.length - 2];
+    const crcData = bytes.slice(0, bytes.length - 2);
+    const calcCRC = crc16Modbus(crcData);
+    const crcValid = receivedCRC === calcCRC;
+    rows.push(makeRow(
+      bytesToHex(bytes, bytes.length - 2, 2),
+      'CRC (CRC-16/Modbus)',
+      `${toHexVal(receivedCRC, 4)} (${receivedCRC}) ${crcValid ? '✓ корректный' : '✗ некорректный (ожидался ' + toHexVal(calcCRC, 4) + ')'}`,
+      crcValid ? 'crc-ok' : 'crc-err'
+    ));
+    result.crcValid = crcValid;
+    result.calcCRC = calcCRC;
+    result.receivedCRC = receivedCRC;
+
+    if (!crcValid) {
+      result.warnings.unshift('CRC не совпадает — пакет повреждён или неверный.');
+    }
+  } else {
+    result.warnings.push('Нет места для CRC.');
+  }
+
+  return result;
+}
+
+// ===================== UI Rendering =====================
+function renderTable(result) {
+  if (result.error) {
+    const card = document.getElementById('resultCard');
+    card.style.display = 'none';
+    const status = document.getElementById('statusMsg');
+    status.className = 'status error';
+    status.textContent = result.error;
+    return;
+  }
+
+  const content = document.getElementById('resultContent');
+  let html = '';
+
+  // --- Overall status banner ---
+  const hasWarnings = result.warnings && result.warnings.length > 0;
+  const crcBad = result.crcValid === false;
+  const isValid = result.crcValid === true && !hasWarnings;
+
+  html += '<div style="padding:14px 16px;border-radius:8px 8px 0 0;font-weight:600;font-size:15px;margin-bottom:0;' +
+    (isValid
+      ? 'background:#d4edda;color:#155724;border:1px solid #c3e6cb;'
+      : 'background:#f8d7da;color:#721c24;border:1px solid #f5c6cb;') +
+    '">' +
+    (isValid
+      ? '&#10004; Валидный пакет'
+      : '&#10008; Невалидный пакет' + (crcBad ? ' — несовпадение CRC' : '')) +
+    '</div>';
+
+  // --- Warnings ---
+  if (hasWarnings) {
+    for (const w of result.warnings) {
+      html += '<div style="padding:8px 16px;background:#fff3cd;color:#856404;border:1px solid #ffeeba;border-top:0;font-size:13px;">&#9888; ' + w + '</div>';
+    }
+  }
+
+  html += '<table>';
+
+  // Direction indicator
+  const direction = document.querySelector('input[name="direction"]:checked').value;
+  const directionLabel = direction === 'request' ? 'Request' : 'Response';
+  html += `<tr><td colspan="3" style="background:#f0f7ff;font-weight:600;border-bottom:2px solid #d0e3f5;">
+    ${directionLabel} — Slave ${toHexVal(result.slaveAddr, 2)} (${result.slaveAddr})
+    ${result.isException ? ' — <span style="color:#e67e22;">EXCEPTION RESPONSE</span>' : ''}
+  </td></tr>`;
+
+  // Table header
+  html += '<tr><th>Part of Data Package</th><th>Description</th><th>Value</th></tr>';
+
+  for (const row of result.rows) {
+    const cls = row.cls ? ` class="${row.cls}"` : '';
+    const vcls = row.valCls ? ` class="${row.valCls}"` : ' class="value-cell"';
+    html += `<tr${cls}><td class="bytes">${row.bytes}</td><td>${row.desc}</td><td${vcls}>${row.value}</td></tr>`;
+  }
+
+  html += '</table>';
+
+  // CRC summary (detailed)
+  if (result.crcValid !== undefined) {
+    html += `<div style="margin-top:12px;padding:10px 14px;border-radius:8px;font-size:14px;${
+      result.crcValid
+        ? 'background:#e8f8f5;color:#1a7a5c;border:1px solid #b2dfdb;'
+        : 'background:#fff5f5;color:#c0392b;border:1px solid #f5c6cb;'
+    }">`;
+    html += result.crcValid
+      ? `✓ CRC корректный: ${toHexVal(result.receivedCRC, 4)}`
+      : `✗ CRC некорректный: получен ${toHexVal(result.receivedCRC, 4)}, ожидался ${toHexVal(result.calcCRC, 4)}`;
+    html += '</div>';
+  }
+
+  content.innerHTML = html;
+  document.getElementById('resultCard').style.display = 'block';
+  document.getElementById('statusMsg').className = 'status';
+  document.getElementById('statusMsg').textContent = '';
+}
+
+// ===================== Event Handlers =====================
+function parse() {
+  const hexStr = document.getElementById('dataInput').value;
+  const direction = document.querySelector('input[name="direction"]:checked').value;
+  const result = parsePackage(hexStr, direction);
+  renderTable(result);
+  updateByteCount();
+}
+
+function updateByteCount() {
+  const hexStr = document.getElementById('dataInput').value.trim();
+  const bytes = hexStr ? hexToBytes(hexStr) : null;
+  document.getElementById('byteCount').textContent = bytes ? `Байт: ${bytes.length}` : '';
+}
+
+// Auto-parse on radio change
+document.querySelectorAll('input[name="direction"]').forEach(el => {
+  el.addEventListener('change', () => {
+    if (document.getElementById('dataInput').value.trim()) parse();
+  });
+});
+
+// Parse button
+document.getElementById('parseBtn').addEventListener('click', parse);
+
+// Enter in textarea triggers parse (Shift+Enter for newline)
+document.getElementById('dataInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); parse(); }
+});
+
+// Update byte count on input
+document.getElementById('dataInput').addEventListener('input', updateByteCount);
+
+// Auto-fill example on first focus
+let firstFocus = true;
+document.getElementById('dataInput').addEventListener('focus', function() {
+  if (firstFocus && !this.value.trim()) {
+    this.value = '10 06 02 02 00 03 6A F2';
+    updateByteCount();
+    firstFocus = false;
+  }
+});
+</script>
+</body>
+</html>

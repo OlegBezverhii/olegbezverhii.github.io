@@ -4,9 +4,15 @@ title: Проекты на Github
 permalink: /project/
 ---
 
-На данной странице распороложен перечень проектов и ссылки на них.
+На данной странице расположен перечень проектов и ссылки на них.
 
 # Актуальные проекты
+
+## MODBUS RTU Parser
+
+По сути аналог https://rapidscada.net/modbus/.
+
+[Ссылка тыц](http://olegbezverhii.github.io/modbus/index.html)
 
 ## Анализ прошивок от Schneider Electric
 
