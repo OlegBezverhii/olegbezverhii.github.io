@@ -14,6 +14,14 @@ permalink: /project/
 
 [Ссылка тыц](http://olegbezverhii.github.io/modbus/index.html)
 
+
+## Unity Different
+
+Настольное WPF-приложение для сравнения файлов проектов Unity Pro (ПЛК Schneider Electric). Позволяет быстро находить различия между версиями проектов и формировать HTML-отчёты.
+
+Ссылка на репозиторий с расшифровкой - [Unity-Different на github](https://github.com/OlegBezverhii/Unity-Different) и она же [gitverse](https://gitverse.ru/olegbezverhii/Unity-Different) .
+
+
 ## Анализ прошивок от Schneider Electric
 
 [Статья на Habrahabr](https://habr.com/ru/articles/752178/)
