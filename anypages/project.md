@@ -8,6 +8,15 @@ permalink: /project/
 
 # Актуальные проекты
 
+
+
+## Подготовка к тесту по промбезу
+
+[Тренажер](http://olegbezverhii.github.io/magistratura/training/A1_2024_тренажёр.html)
+[Шпаргалка](http://olegbezverhii.github.io/magistratura/training/A1_2024_шпаргалка.html)
+
+
+
 ## MODBUS RTU Parser
 
 По сути аналог https://rapidscada.net/modbus/.
